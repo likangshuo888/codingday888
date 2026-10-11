@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>校园链 · CAMPUS CHAIN // 信誉体系控制台</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Roboto','PingFang SC','Microsoft YaHei',Arial,sans-serif;
+    color:#E6F1FF;
+    background:
+      linear-gradient(rgba(0,198,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,198,255,0.04) 1px, transparent 1px),
+      radial-gradient(1200px 600px at 20% -10%, rgba(30,90,220,0.35), transparent 60%),
+      radial-gradient(900px 500px at 85% 10%, rgba(0,198,255,0.18), transparent 60%),
+      #070B16;
+    background-size: 32px 32px, 32px 32px, auto, auto, auto;
+    min-height:100vh; padding:20px 24px 48px;
+  }
+  .wrap { max-width:1280px; margin:0 auto; }
+  header {
+    display:flex; flex-wrap:wrap; align-items:center; gap:14px;
+    padding:16px 20px; margin-bottom:18px;
+    background:rgba(10,18,36,0.85); border:1px solid rgba(0,198,255,0.25);
+    border-radius:14px; box-shadow:0 0 18px rgba(0,198,255,0.10);
+  }
+  .logo { font-size:20px; font-weight:700; letter-spacing:1px; }
+  .logo b { color:#00C6FF; text-shadow:0 0 12px rgba(0,198,255,0.7); }
+  .logo small { display:block; font-size:11px; font-weight:400; color:#7FA6D9; letter-spacing:2px; margin-top:2px; }
+  .status { display:flex; align-items:center; gap:8px; font-size:13px; color:#9FC6FF; background:rgba(0,198,255,0.08); padding:6px 14px; border-radius:20px; border:1px solid rgba(0,198,255,0.3); }
+  .dot { width:9px; height:9px; border-radius:50%; background:#52C41A; box-shadow:0 0 8px #52C41A; }
+  .dot.off { background:#EA6668; box-shadow:0 0 8px #EA6668; }
+  .spacer { flex:1; }
+  .btn {
+    font-family:inherit; font-size:13px; font-weight:600; color:#0A1120;
+    background:linear-gradient(135deg,#00C6FF,#4DA3FF); border:none; border-radius:8px;
+    padding:9px 18px; cursor:pointer; transition:transform .12s, box-shadow .12s;
+    box-shadow:0 0 12px rgba(0,198,255,0.35);
+  }
+  .btn:hover { transform:translateY(-1px); box-shadow:0 0 18px rgba(0,198,255,0.6); }
+  .btn.ghost { background:transparent; color:#9FC6FF; border:1px solid rgba(0,198,255,0.4); box-shadow:none; }
+  .stats { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+  .stat {
+    flex:1 1 180px; min-width:0; padding:14px 16px;
+    background:rgba(10,18,36,0.85); border:1px solid rgba(0,198,255,0.18);
+    border-radius:12px; box-shadow:0 0 14px rgba(0,198,255,0.06);
+  }
+  .stat .k { font-size:12px; color:#7FA6D9; letter-spacing:1px; }
+  .stat .v { font-size:22px; font-weight:700; color:#00C6FF; margin-top:4px; font-family:Consolas,'Courier New',monospace; text-shadow:0 0 10px rgba(0,198,255,0.4); }
+  .stat .v small { font-size:12px; font-weight:400; color:#9FC6FF; }
+  .grid { display:flex; flex-wrap:wrap; gap:14px; }
+  .panel {
+    background:rgba(10,18,36,0.88); border:1px solid rgba(0,198,255,0.18);
+    border-radius:14px; padding:16px; box-shadow:0 0 16px rgba(0,198,255,0.07);
+  }
+  .panel h3 { font-size:14px; color:#00C6FF; letter-spacing:1px; margin-bottom:12px; font-weight:600; }
+  .panel h3 small { color:#7FA6D9; font-weight:400; margin-left:8px; font-size:11px; }
+  .col-chain { flex:1 1 300px; min-width:0; }
+  .col-merkle { flex:1.2 1 380px; min-width:0; }
+  .col-right { flex:1 1 260px; min-width:0; display:flex; flex-direction:column; gap:14px; }
+  .block-card {
+    padding:12px 14px; margin-bottom:10px; border-radius:10px;
+    background:rgba(0,198,255,0.05); border:1px solid rgba(0,198,255,0.15);
+    cursor:pointer; transition:border-color .15s, background .15s;
+  }
+  .block-card:hover, .block-card.active { border-color:#00C6FF; background:rgba(0,198,255,0.12); box-shadow:0 0 12px rgba(0,198,255,0.2); }
+  .block-card .row1 { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .block-card .bc { font-family:Consolas,'Courier New',monospace; font-weight:700; color:#00C6FF; font-size:15px; }
+  .block-card .txn { font-size:12px; color:#9FC6FF; }
+  .block-card .meta { font-size:11px; color:#7FA6D9; margin-top:6px; font-family:Consolas,'Courier New',monospace; word-break:break-all; }
+  .hash { font-family:Consolas,'Courier New',monospace; color:#7FB8FF; }
+  .pool-row {
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+    padding:9px 12px; margin-bottom:8px; border-radius:8px;
+    background:rgba(0,198,255,0.04); border:1px solid rgba(0,198,255,0.12);
+    font-size:12.5px;
+  }
+  .pool-row .amt { font-family:Consolas,'Courier New',monospace; font-weight:700; color:#00C6FF; }
+  .pool-row .typ { color:#9FC6FF; font-size:11px; }
+  .empty { color:#5B7FA8; font-size:12.5px; padding:10px 4px; }
+  .tree-area { overflow-x:auto; padding-bottom:6px; }
+  .tree-level { display:flex; justify-content:center; flex-wrap:wrap; gap:6px; margin-bottom:6px; }
+  .tree-node {
+    font-family:Consolas,'Courier New',monospace; font-size:10.5px;
+    padding:5px 9px; border-radius:6px; word-break:break-all; max-width:260px;
+    background:rgba(0,198,255,0.07); border:1px solid rgba(0,198,255,0.2); color:#9FC6FF;
+    cursor:pointer; text-align:center;
+  }
+  .tree-node.root { color:#00C6FF; border-color:#00C6FF; background:rgba(0,198,255,0.16); font-weight:700; text-shadow:0 0 8px rgba(0,198,255,0.5); }
+  .tree-node.leaf { color:#B8D8FF; }
+  .tree-node.sibling { border-color:#EA6668; color:#FF9A9B; }
+  .tree-divider { text-align:center; color:#3D6A9E; font-size:12px; line-height:1; margin:2px 0 8px; }
+  .proof-box { margin-top:10px; padding:10px 12px; border-radius:8px; font-size:12px; font-family:Consolas,'Courier New',monospace; word-break:break-all; border:1px solid rgba(0,198,255,0.2); background:rgba(0,198,255,0.06); }
+  .proof-box .ok { color:#52C41A; font-weight:700; }
+  .proof-box .bad { color:#EA6668; font-weight:700; }
+  .ops { display:flex; flex-direction:column; gap:10px; }
+  .ops label { font-size:12px; color:#7FA6D9; }
+  .ops input {
+    font-family:inherit; font-size:14px; color:#E6F1FF; padding:9px 12px; border-radius:8px;
+    background:rgba(0,60,120,0.25); border:1px solid rgba(0,198,255,0.3); outline:none; width:100%;
+  }
+  .ops input:focus { border-color:#00C6FF; box-shadow:0 0 10px rgba(0,198,255,0.3); }
+  .ops .hint { font-size:11px; color:#5B7FA8; line-height:1.6; }
+  .toast {
+    position:fixed; right:24px; bottom:24px; padding:12px 18px; border-radius:10px;
+    background:rgba(0,198,255,0.15); border:1px solid #00C6FF; color:#E6F1FF;
+    font-size:13px; box-shadow:0 0 16px rgba(0,198,255,0.3); opacity:0; transition:opacity .3s; max-width:340px;
+  }
+  @media (max-width:480px) {
+    body { padding:12px 12px 36px; }
+    .logo { font-size:17px; }
+    .stat .v { font-size:18px; }
+    .tree-node { max-width:180px; }
+  }
+</style>
+</head>
+<body>
+<div id="gate" style="position:fixed;inset:0;z-index:99;display:none;align-items:center;justify-content:center;background:rgba(4,8,18,0.97);">
+  <div style="max-width:340px;width:90%;padding:22px;border-radius:14px;border:1px solid rgba(0,198,255,0.3);background:rgba(10,18,36,0.95);box-shadow:0 0 30px rgba(0,198,255,0.2);text-align:center;">
+    <div style="font-size:15px;font-weight:700;color:#00C6FF;margin-bottom:4px;">平台管控控制台</div>
+    <div style="font-size:12px;color:#7FA6D9;margin-bottom:14px;">仅平台管理员可见 · 请输入访问口令</div>
+    <input id="gateKey" type="password" placeholder="访问口令" style="width:100%;padding:10px 12px;border-radius:8px;background:rgba(0,60,120,0.25);border:1px solid rgba(0,198,255,0.3);color:#E6F1FF;font-size:14px;outline:none;margin-bottom:12px;box-sizing:border-box;">
+    <button onclick="gateLogin()" style="width:100%;padding:11px;border:none;border-radius:8px;background:linear-gradient(135deg,#00C6FF,#4DA3FF);color:#0A1120;font-size:14px;font-weight:600;cursor:pointer;">进入控制台</button>
+    <div id="gateErr" style="font-size:12px;color:#EA6668;margin-top:10px;display:none;">口令错误，请重试</div>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <div class="logo"><b>校园链</b> CAMPUS CHAIN // 信誉体系控制台<small>校园行为上链 · 信誉积分 · 批量哈希验证</small></div>
+    <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">连接中…</span></div>
+    <div class="spacer"></div>
+    <button class="btn ghost" onclick="refreshNow()">⟳ 刷新</button>
+  </header>
+
+  <div class="stats">
+    <div class="stat"><div class="k">区块高度</div><div class="v" id="statHeight">0</div></div>
+    <div class="stat"><div class="k">行为池</div><div class="v" id="statPool">0</div></div>
+    <div class="stat"><div class="k">连接节点</div><div class="v" id="statPeers">0</div></div>
+    <div class="stat"><div class="k">最新默克尔根</div><div class="v" id="statRoot" style="font-size:14px;">—</div></div>
+  </div>
+
+  <div class="panel" style="margin-bottom:14px;">
+    <h3>平台管控 <small>学生诚信榜 · 行为流水 · 市集订单 · 资助审批（仅平台可见）</small></h3>
+    <div style="display:flex;flex-wrap:wrap;gap:14px;">
+      <div style="flex:1 1 250px;min-width:0;">
+        <div style="font-size:12px;color:#7FA6D9;margin-bottom:8px;">👥 学生诚信榜</div>
+        <div id="admStudents"></div>
+      </div>
+      <div style="flex:1 1 250px;min-width:0;">
+        <div style="font-size:12px;color:#7FA6D9;margin-bottom:8px;">📋 行为流水（最近 20 条）</div>
+        <div id="admRecords" style="max-height:300px;overflow-y:auto;"></div>
+      </div>
+      <div style="flex:1 1 250px;min-width:0;">
+        <div style="font-size:12px;color:#7FA6D9;margin-bottom:8px;">📦 市集订单</div>
+        <div id="admOrders"></div>
+      </div>
+      <div style="flex:1 1 250px;min-width:0;">
+        <div style="font-size:12px;color:#7FA6D9;margin-bottom:8px;">💰 资助审批</div>
+        <div id="admFunds"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="panel col-chain">
+      <h3>区块浏览器<small>点击区块查看行为批量哈希树</small></h3>
+      <div id="chainList"></div>
+    </div>
+
+    <div class="panel col-merkle">
+      <h3>默克尔树 <span class="hash" id="merkleTitle" style="font-size:11px;">— 未选择区块 —</span></h3>
+      <div class="tree-area" id="treeArea"><div class="empty">点击左侧区块，查看该批校园行为的默克尔哈希树</div></div>
+      <div id="proofBox"></div>
+    </div>
+
+    <div class="col-right">
+      <div class="panel">
+        <h3>行为池 <small id="poolCount"></small></h3>
+        <div id="poolList"></div>
+      </div>
+      <div class="panel">
+        <h3>操作台</h3>
+        <div class="ops">
+          <label>发起校园行为（行为积分）</label>
+          <input type="number" id="amountInput" value="10" min="1">
+          <button class="btn" onclick="issueTx()">▶ 发起校园行为</button>
+          <label>行为打包上链</label>
+          <button class="btn" onclick="forgeBlock()">⛓ 打包行为上链</button>
+          <div class="hint">校园行为（志愿服务 / 二手交易 / 竞赛获奖）将广播至全网节点；出块时整批行为经默克尔树批量哈希，生成唯一根哈希，任何一条均可单独验证。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var currentBlock = -1;
+  var $ = function(id){ return document.getElementById(id); };
+
+  function short(s, n){
+    n = n || 12;
+    if(!s) return '';
+    return s.length > n ? s.slice(0, n) + '…' : s;
+  }
+  function shortPem(s){
+    if(!s) return '';
+    var b = s.replace(/-----/g, '').replace(/\s+/g, '');
+    return short(b, 14);
+  }
+  function fmtTime(ts){
+    if(!ts) return '—';
+    return new Date(ts * 1000).toLocaleString();
+  }
+  function toast(msg){
+    var t = $('toast');
+    t.textContent = msg;
+    t.style.opacity = 1;
+    setTimeout(function(){ t.style.opacity = 0; }, 2600);
+  }
+
+  function loadChain(){
+    return fetch('/api/chain').then(function(r){ return r.json(); }).then(function(data){
+      var blocks = data.blocks || [];
+      $('statHeight').textContent = blocks.length - 1;
+      var latest = blocks[blocks.length - 1];
+      $('statRoot').textContent = latest && latest.merkleRoot ? short(latest.merkleRoot, 16) : 'GENESIS';
+      var html = '';
+      for (var i = blocks.length - 1; i >= 0; i--) {
+        var b = blocks[i];
+        html += '<div class="block-card' + (i === currentBlock ? ' active' : '') + '" onclick="window.renderMerkle(' + i + ')">' +
+          '<div class="row1"><span class="bc"># ' + b.blockCount + '</span>' +
+          '<span class="txn">' + (b.transactions ? b.transactions.length : 0) + ' 条行为</span></div>' +
+          '<div class="meta">MKR ' + (b.merkleRoot ? short(b.merkleRoot, 18) : 'GENESIS') + '<br>' +
+          'forger ' + shortPem(b.forger) + '<br>' +
+          fmtTime(b.timestamp) + '</div></div>';
+      }
+      $('chainList').innerHTML = html || '<div class="empty">链为空</div>';
+      return blocks;
+    });
+  }
+
+  function loadPool(){
+    return fetch('/api/pool').then(function(r){ return r.json(); }).then(function(list){
+      $('statPool').textContent = list.length;
+      $('poolCount').textContent = list.length + ' 条';
+      if(!list.length){
+        $('poolList').innerHTML = '<div class="empty">行为池为空 — 到操作台发起一条校园行为</div>';
+        return;
+      }
+      var html = '';
+      for (var i = list.length - 1; i >= 0; i--) {
+        var t = list[i];
+        html += '<div class="pool-row"><span class="amt">+' + t.amount + '</span>' +
+          '<span class="typ">' + t.type + '</span>' +
+          '<span class="hash">' + short(t.hash, 10) + '</span></div>';
+      }
+      $('poolList').innerHTML = html;
+    });
+  }
+
+  function loadPeers(){
+    return fetch('/api/peers').then(function(r){ return r.json(); }).then(function(list){
+      $('statPeers').textContent = list.length;
+    });
+  }
+
+  function renderMerkle(blockIndex){
+    currentBlock = blockIndex;
+    fetch('/api/merkle/' + blockIndex).then(function(r){ return r.json(); }).then(function(data){
+      if(data.error){ return; }
+      $('merkleTitle').textContent = 'BLOCK #' + data.blockIndex;
+      var levels = data.levels; // [leaves ... root]
+      var html = '';
+      for (var l = levels.length - 1; l >= 0; l--) {
+        html += '<div class="tree-divider">' + (l === levels.length - 1 ? 'MERKLE ROOT' : 'LEVEL ' + l) + '</div>';
+        html += '<div class="tree-level">';
+        for (var j = 0; j < levels[l].length; j++) {
+          var cls = 'tree-node' + (l === levels.length - 1 ? ' root' : (l === 0 ? ' leaf' : ''));
+          var label = l === 0 && data.leaves && data.leaves[j] ? short(data.leaves[j].txId, 8) + ' / ' : '';
+          html += '<span class="' + cls + '" title="' + levels[l][j] + '"' +
+            (l === 0 ? ' onclick="window.verifyLeaf(' + blockIndex + ',' + j + ')"' : '') + '>' +
+            label + short(levels[l][j], 10) + '</span>';
+        }
+        html += '</div>';
+      }
+      $('treeArea').innerHTML = html;
+      $('proofBox').innerHTML = '<div class="empty" style="padding:2px 0;">点击叶子节点，生成并验证 Merkle 证明路径</div>';
+      // 高亮左侧区块
+      var cards = document.querySelectorAll('.block-card');
+      for (var i = 0; i < cards.length; i++) {
+        cards[i].classList.toggle('active', i === blockIndex);
+      }
+    });
+  }
+
+  function verifyLeaf(blockIndex, txIndex){
+    fetch('/api/merkleProof/' + blockIndex + '/' + txIndex).then(function(r){ return r.json(); }).then(function(data){
+      if(data.error){ $('proofBox').innerHTML = '<div class="proof-box">' + data.error + '</div>'; return; }
+      var html = '<div class="proof-box">行为记录 #' + txIndex + ' 证明路径（' + data.proof.length + ' 个兄弟节点）<br>';
+      for (var i = 0; i < data.proof.length; i++) {
+        html += '· ' + (data.proof[i].isLeft ? '左' : '右') + ' ' + short(data.proof[i].sibling, 14) + '<br>';
+      }
+      html += 'ROOT ' + short(data.root, 14) + '<br>' +
+        (data.verified ? '<span class="ok">✔ 验证通过 — 该行为记录确属本区块，未被篡改</span>' : '<span class="bad">✘ 验证失败</span>') + '</div>';
+      $('proofBox').innerHTML = html;
+    });
+  }
+
+  function issueTx(){
+    var amount = parseInt($('amountInput').value, 10);
+    if(!amount || amount <= 0){ toast('请输入有效金额'); return; }
+    fetch('/api/issue', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({amount: amount}) })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(data.error){ toast('失败: ' + data.error); return; }
+        toast('✔ 校园行为已签名并广播全网 · 积分 +' + data.amount);
+        refreshNow();
+      });
+  }
+
+  function forgeBlock(){
+    fetch('/api/forge', { method:'POST' })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(data.error){ toast(data.error); return; }
+        toast('⛓ 新区块 #' + data.blockCount + ' 已上链 · 行为哈希根 ' + short(data.merkleRoot, 14));
+        currentBlock = -1;
+        refreshNow();
+        renderMerkle(data.blockCount);
+      });
+  }
+
+  var ADMIN_KEY = 'campus-admin';   // 平台管控口令（演示默认值，可自行修改）
+  var gated = false;
+
+  function gateLogin(){
+    if($('gateKey').value === ADMIN_KEY){
+      localStorage.setItem('cc_admin_ok', '1');
+      $('gate').style.display = 'none';
+      $('gateErr').style.display = 'none';
+    } else {
+      $('gateErr').style.display = 'block';
+    }
+  }
+
+  function checkGate(){
+    if(localStorage.getItem('cc_admin_ok') === '1'){ return; }
+    $('gate').style.display = 'flex';
+    $('gateKey').focus();
+    gated = true;
+  }
+
+  function refreshNow(){
+    loadChain(); loadPool(); loadPeers(); loadAdmin();
+  }
+
+  function loadAdmin(){
+    fetch('/api/admin/students').then(function(r){ return r.json(); }).then(function(list){
+      if(!list.length){ $('admStudents').innerHTML = '<div class="empty">暂无注册学生</div>'; return; }
+      var html = '';
+      for(var i=0;i<list.length;i++){
+        var s = list[i];
+        html += '<div class="pool-row"><span class="hash">#'+s.studentId+' '+s.name+'</span>' +
+          '<span class="amt">'+s.reputation+'分</span><span class="typ">'+s.level+' · '+s.count+'条</span></div>';
+      }
+      $('admStudents').innerHTML = html;
+    });
+    fetch('/api/admin/records').then(function(r){ return r.json(); }).then(function(list){
+      if(!list.length){ $('admRecords').innerHTML = '<div class="empty">暂无行为记录</div>'; return; }
+      var html = '';
+      for(var i=0;i<Math.min(list.length,20);i++){
+        var r = list[i];
+        html += '<div class="pool-row"><span class="hash">#'+(r.studentId||'—')+'</span>' +
+          '<span>'+r.content+'</span><span class="typ">'+r.type+(r.onchain?'':'·待')+'</span></div>';
+      }
+      $('admRecords').innerHTML = html;
+    });
+    fetch('/api/admin/orders').then(function(r){ return r.json(); }).then(function(list){
+      if(!list.length){ $('admOrders').innerHTML = '<div class="empty">暂无市集订单</div>'; return; }
+      var html = '';
+      for(var i=0;i<list.length;i++){
+        var o = list[i];
+        html += '<div class="pool-row"><span>《'+o.title+'》</span><span class="amt">¥'+o.price+'</span>' +
+          '<span class="typ">卖家#'+o.seller+' '+(o.sold?'已售':'在售')+'</span></div>';
+      }
+      $('admOrders').innerHTML = html;
+    });
+    fetch('/api/admin/funds').then(function(r){ return r.json(); }).then(function(list){
+      if(!list.length){ $('admFunds').innerHTML = '<div class="empty">暂无资助申请</div>'; return; }
+      var html = '';
+      for(var i=0;i<list.length;i++){
+        var f = list[i];
+        var act = '';
+        if(f.status === 'pending'){
+          act = '<button class="btn small" style="width:auto;padding:4px 10px;font-size:11px;" onclick="window.reviewFund(\''+f.applyId+'\',true)">通过</button> ' +
+                '<button class="btn ghost" style="width:auto;padding:4px 10px;font-size:11px;" onclick="window.reviewFund(\''+f.applyId+'\',false)">驳回</button>';
+        } else {
+          act = '<span class="typ">'+(f.status==='approved'?'已通过':'已驳回')+'</span>';
+        }
+        html += '<div class="pool-row"><span class="hash">#'+f.studentId+'</span><span>¥'+f.amount+' '+f.reason+'</span>'+act+'</div>';
+      }
+      $('admFunds').innerHTML = html;
+    });
+  }
+
+  window.reviewFund = function(applyId, approve){
+    fetch('/api/admin/fundReview', {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({applyId:applyId, approve:approve})})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d.error){ toast(d.error); return; }
+        toast(approve ? '✔ 已通过，发放记录已上链' : '已驳回该申请');
+        refreshNow();
+      });
+  };
+
+  function setStatus(ok){
+    $('statusDot').className = 'dot' + (ok ? '' : ' off');
+    $('statusText').textContent = ok ? '校园节点在线 · 全网同步' : '校园节点离线';
+  }
+
+  function poll(){
+    fetch('/api/chain').then(function(r){
+      setStatus(r.ok);
+      return refreshNow();
+    }).catch(function(){ setStatus(false); });
+  }
+
+  window.renderMerkle = renderMerkle;
+  window.verifyLeaf = verifyLeaf;
+  window.issueTx = issueTx;
+  window.gateLogin = gateLogin;
+  window.forgeBlock = forgeBlock;
+  window.refreshNow = refreshNow;
+
+  checkGate();
+  refreshNow();
+  setInterval(poll, 3000);
+})();
+</script>
+</body>
+</html>

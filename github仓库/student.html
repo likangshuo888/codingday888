@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>校园链 · 学生端</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Roboto','PingFang SC','Microsoft YaHei',Arial,sans-serif;
+    color:#E6F1FF;
+    background:
+      linear-gradient(rgba(0,198,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,198,255,0.04) 1px, transparent 1px),
+      radial-gradient(1000px 500px at 15% -10%, rgba(30,90,220,0.35), transparent 60%),
+      radial-gradient(800px 420px at 90% 5%, rgba(0,198,255,0.16), transparent 60%),
+      #070B16;
+    background-size:32px 32px, 32px 32px, auto, auto, auto;
+    min-height:100vh; padding:16px 16px 60px;
+  }
+  .wrap { max-width:780px; margin:0 auto; }
+  header {
+    display:flex; flex-wrap:wrap; align-items:center; gap:10px;
+    padding:14px 16px; margin-bottom:14px;
+    background:rgba(10,18,36,0.85); border:1px solid rgba(0,198,255,0.25);
+    border-radius:14px; box-shadow:0 0 18px rgba(0,198,255,0.10);
+  }
+  .logo { font-size:18px; font-weight:700; }
+  .logo b { color:#00C6FF; text-shadow:0 0 12px rgba(0,198,255,0.7); }
+  .logo small { display:block; font-size:11px; color:#7FA6D9; letter-spacing:2px; margin-top:2px; font-weight:400; }
+  .status { display:flex; align-items:center; gap:6px; font-size:12px; color:#9FC6FF; background:rgba(0,198,255,0.08); padding:5px 12px; border-radius:20px; border:1px solid rgba(0,198,255,0.3); }
+  .dot { width:8px; height:8px; border-radius:50%; background:#52C41A; box-shadow:0 0 8px #52C41A; }
+  .spacer { flex:1; }
+  .card { background:rgba(10,18,36,0.88); border:1px solid rgba(0,198,255,0.18); border-radius:14px; padding:16px; margin-bottom:14px; box-shadow:0 0 16px rgba(0,198,255,0.07); }
+  .card h3 { font-size:14px; color:#00C6FF; letter-spacing:1px; margin-bottom:12px; font-weight:600; }
+  .stats { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
+  .stat { flex:1 1 140px; min-width:0; padding:12px 14px; background:rgba(10,18,36,0.85); border:1px solid rgba(0,198,255,0.18); border-radius:12px; box-shadow:0 0 14px rgba(0,198,255,0.06); }
+  .stat .k { font-size:11.5px; color:#7FA6D9; letter-spacing:1px; }
+  .stat .v { font-size:20px; font-weight:700; color:#00C6FF; margin-top:3px; font-family:Consolas,'Courier New',monospace; text-shadow:0 0 10px rgba(0,198,255,0.4); }
+  .stat .v small { font-size:11px; font-weight:400; color:#9FC6FF; }
+  .tabs { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+  .tab { flex:1 1 110px; text-align:center; padding:10px 8px; border-radius:10px; cursor:pointer; background:rgba(10,18,36,0.85); border:1px solid rgba(0,198,255,0.18); color:#9FC6FF; font-size:13px; font-weight:600; transition:all .15s; }
+  .tab.active { color:#0A1120; background:linear-gradient(135deg,#00C6FF,#4DA3FF); border-color:transparent; box-shadow:0 0 14px rgba(0,198,255,0.4); }
+  .field { margin-bottom:10px; }
+  .field label { display:block; font-size:12px; color:#7FA6D9; margin-bottom:5px; }
+  .field input, .field textarea, .field select {
+    font-family:inherit; font-size:14px; color:#E6F1FF; padding:9px 12px; border-radius:8px; width:100%;
+    background:rgba(0,60,120,0.25); border:1px solid rgba(0,198,255,0.3); outline:none;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color:#00C6FF; box-shadow:0 0 10px rgba(0,198,255,0.3); }
+  .field textarea { resize:vertical; min-height:52px; }
+  .field select option { background:#0A1224; color:#E6F1FF; }
+  .btn { font-family:inherit; font-size:13.5px; font-weight:600; color:#0A1120; width:100%; background:linear-gradient(135deg,#00C6FF,#4DA3FF); border:none; border-radius:8px; padding:11px 16px; cursor:pointer; transition:transform .12s, box-shadow .12s; box-shadow:0 0 12px rgba(0,198,255,0.35); }
+  .btn:hover { transform:translateY(-1px); box-shadow:0 0 18px rgba(0,198,255,0.6); }
+  .btn.small { width:auto; padding:7px 13px; font-size:12px; }
+  .btn.ghost { background:transparent; color:#9FC6FF; border:1px solid rgba(0,198,255,0.4); box-shadow:none; }
+  .list-item { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:11px 13px; margin-bottom:9px; border-radius:10px; background:rgba(0,198,255,0.04); border:1px solid rgba(0,198,255,0.12); font-size:13px; }
+  .list-item .main { flex:1 1 170px; min-width:0; }
+  .list-item .title { font-weight:600; color:#E6F1FF; }
+  .list-item .sub { font-size:11px; color:#7FA6D9; margin-top:3px; word-break:break-all; }
+  .badge { display:inline-block; font-size:11px; padding:3px 9px; border-radius:6px; font-weight:600; }
+  .badge.item { color:#00C6FF; background:rgba(0,198,255,0.12); border:1px solid rgba(0,198,255,0.35); }
+  .badge.book { color:#8BC8EA; background:rgba(139,200,234,0.12); border:1px solid rgba(139,200,234,0.35); }
+  .badge.buy { color:#E4D48F; background:rgba(228,212,143,0.12); border:1px solid rgba(228,212,143,0.35); }
+  .badge.vol { color:#94D8C3; background:rgba(148,216,195,0.12); border:1px solid rgba(148,216,195,0.35); }
+  .badge.task { color:#A2DDAA; background:rgba(162,221,170,0.12); border:1px solid rgba(162,221,170,0.35); }
+  .badge.club { color:#C9A7E8; background:rgba(201,167,232,0.12); border:1px solid rgba(201,167,232,0.35); }
+  .badge.comp { color:#F4B393; background:rgba(244,179,147,0.12); border:1px solid rgba(244,179,147,0.35); }
+  .badge.fund { color:#E1B98F; background:rgba(225,185,143,0.12); border:1px solid rgba(225,185,143,0.35); }
+  .badge.chain { color:#52C41A; background:rgba(82,196,26,0.12); border:1px solid rgba(82,196,26,0.35); }
+  .badge.pending { color:#FAAD14; background:rgba(250,173,20,0.12); border:1px solid rgba(250,173,20,0.35); }
+  .badge.sold { color:#EA6668; background:rgba(234,102,104,0.12); border:1px solid rgba(234,102,104,0.35); }
+  .badge.rejected { color:#EA6668; background:rgba(234,102,104,0.12); border:1px solid rgba(234,102,104,0.35); }
+  .price { font-family:Consolas,'Courier New',monospace; font-weight:700; color:#00C6FF; font-size:15px; }
+  .empty { color:#5B7FA8; font-size:12.5px; padding:10px 4px; }
+  .profile { display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:10px 13px; border-radius:10px; margin-bottom:14px; background:rgba(0,198,255,0.06); border:1px solid rgba(0,198,255,0.2); }
+  .profile .id { font-family:Consolas,'Courier New',monospace; font-size:12px; color:#7FB8FF; word-break:break-all; }
+  .rep-badge { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; padding:4px 12px; border-radius:20px; }
+  .rep-gold { color:#FFD666; background:rgba(255,214,102,0.12); border:1px solid rgba(255,214,102,0.4); text-shadow:0 0 10px rgba(255,214,102,0.4); }
+  .rep-silver { color:#D8E4FF; background:rgba(216,228,255,0.12); border:1px solid rgba(216,228,255,0.4); }
+  .rep-bronze { color:#F4B393; background:rgba(244,179,147,0.12); border:1px solid rgba(244,179,147,0.4); }
+  .toast { position:fixed; right:16px; bottom:16px; left:16px; margin:auto; max-width:420px; padding:12px 16px; border-radius:10px; text-align:center; background:rgba(0,198,255,0.15); border:1px solid #00C6FF; color:#E6F1FF; font-size:13px; box-shadow:0 0 16px rgba(0,198,255,0.3); opacity:0; transition:opacity .3s; z-index:9; }
+  @media (max-width:480px) { .logo { font-size:16px; } .stat .v { font-size:17px; } .tab { flex-basis:calc(50% - 8px); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><b>校园链</b> · 学生端<small>闲置交易 · 志愿服务 · 社团竞赛 · 奖助金 · 链上账本</small></div>
+    <div class="spacer"></div>
+    <div class="status"><span class="dot"></span>链上</div>
+  </header>
+
+  <div class="card" id="regCard">
+    <h3>注册链上身份</h3>
+    <div class="field"><label>学号</label><input id="regId" placeholder="如 20240001"></div>
+    <div class="field"><label>昵称</label><input id="regName" placeholder="如 小明"></div>
+    <button class="btn" onclick="register()">注册 / 进入</button>
+    <div style="font-size:11.5px;color:#5B7FA8;margin-top:10px;line-height:1.6;">注册后系统为你的学号生成专属链上钱包，每一次发布、打卡、交易、申请都由你本人签名上链，账本与诚信度全网可验证。</div>
+  </div>
+
+  <div id="appArea" style="display:none;">
+    <div class="profile">
+      <div>
+        <div style="font-weight:700;font-size:15px;"><span id="pName"></span> <span style="color:#7FA6D9;font-weight:400;font-size:12px;">#<span id="pId"></span></span></div>
+        <div class="id">链上身份 <span id="pKey"></span></div>
+      </div>
+      <span class="rep-badge rep-bronze" id="repBadge">诚信 0 · 青铜</span>
+      <div class="spacer"></div>
+      <button class="btn small ghost" onclick="logout()">切换身份</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="k">诚信度</div><div class="v" id="stReputation">0</div></div>
+      <div class="stat"><div class="k">志愿时长</div><div class="v" id="stHours">0<small> h</small></div></div>
+      <div class="stat"><div class="k">行为记录</div><div class="v" id="stRecords">0<small> 条</small></div></div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('market')">🛒 闲置市集</div>
+      <div class="tab" onclick="switchTab('vol')">🤝 志愿服务</div>
+      <div class="tab" onclick="switchTab('club')">🏅 社团竞赛</div>
+      <div class="tab" onclick="switchTab('fund')">💰 经费资助</div>
+      <div class="tab" onclick="switchTab('ledger')">📒 我的账本</div>
+    </div>
+
+    <!-- 闲置市集 -->
+    <div class="tab-panel" id="panel-market">
+      <div class="card">
+        <h3>发布闲置 / 二手物品</h3>
+        <div class="field"><label>类型</label>
+          <select id="mkType">
+            <option value="book">📚 二手书</option>
+            <option value="bike">🚲 自行车</option>
+            <option value="elec">🔌 数码电器</option>
+            <option value="daily">🧺 生活用品</option>
+            <option value="other">📦 其他</option>
+          </select>
+        </div>
+        <div class="field"><label>名称</label><input id="mkTitle" placeholder="如 数据结构与算法 / 九成新山地车"></div>
+        <div class="field"><label>价格（元）</label><input id="mkPrice" type="number" value="20" min="1"></div>
+        <div class="field"><label>描述 / 成色</label><textarea id="mkDesc" placeholder="如 九成新，有少量笔记"></textarea></div>
+        <button class="btn" onclick="publishItem()">发布上链</button>
+      </div>
+      <div class="card">
+        <h3>市集 <span id="mkCount" style="font-size:11px;color:#7FA6D9;"></span></h3>
+        <div id="mkList"></div>
+      </div>
+    </div>
+
+    <!-- 志愿服务 -->
+    <div class="tab-panel" id="panel-vol" style="display:none;">
+      <div class="card">
+        <h3>志愿服务打卡</h3>
+        <div class="field"><label>服务项目</label><input id="volProject" placeholder="如 图书馆整理 / 迎新志愿者"></div>
+        <div class="field"><label>时长（小时）</label><input id="volHours" type="number" value="2" min="0.5" step="0.5"></div>
+        <button class="btn" onclick="checkinVol()">打卡上链</button>
+      </div>
+      <div class="card">
+        <h3>发布志愿任务 <span style="font-size:11px;color:#7FA6D9;">（挂到任务市场，供其他学生接单）</span></h3>
+        <div class="field"><label>任务名称</label><input id="vtTitle" placeholder="如 帮忙搬运宿舍行李"></div>
+        <div class="field"><label>时长（小时）</label><input id="vtHours" type="number" value="1" min="0.5" step="0.5"></div>
+        <div class="field"><label>说明</label><textarea id="vtDesc" placeholder="如 下午3点，女生宿舍楼下"></textarea></div>
+        <button class="btn" onclick="publishTask()">发布任务</button>
+      </div>
+      <div class="card">
+        <h3>志愿任务市场 <span id="vtCount" style="font-size:11px;color:#7FA6D9;"></span></h3>
+        <div id="vtList"></div>
+      </div>
+    </div>
+
+    <!-- 社团竞赛 -->
+    <div class="tab-panel" id="panel-club" style="display:none;">
+      <div class="card">
+        <h3>社团登记</h3>
+        <div class="field"><label>社团名称</label><input id="clClub" placeholder="如 计算机协会"></div>
+        <div class="field"><label>担任职务</label><input id="clRole" placeholder="如 部长 / 成员"></div>
+        <button class="btn" onclick="joinClub()">登记上链</button>
+      </div>
+      <div class="card">
+        <h3>竞赛获奖登记</h3>
+        <div class="field"><label>竞赛名称</label><input id="cpComp" placeholder="如 全国大学生区块链大赛"></div>
+        <div class="field"><label>获奖情况</label><input id="cpAward" placeholder="如 一等奖 / 参与奖"></div>
+        <button class="btn" onclick="addCompetition()">登记上链</button>
+      </div>
+    </div>
+
+    <!-- 经费资助 -->
+    <div class="tab-panel" id="panel-fund" style="display:none;">
+      <div class="card">
+        <h3>申请经费 / 助学奖金</h3>
+        <div class="field"><label>申请金额（元）</label><input id="fdAmount" type="number" value="500" min="1"></div>
+        <div class="field"><label>申请理由</label><textarea id="fdReason" placeholder="如 家庭困难申请助学金 / 社团活动经费"></textarea></div>
+        <button class="btn" onclick="applyFund()">提交申请</button>
+        <div style="font-size:11.5px;color:#5B7FA8;margin-top:10px;line-height:1.6;">申请提交后进入平台审批，审批结果与发放记录全部上链公示、全程可追溯。</div>
+      </div>
+      <div class="card">
+        <h3>我的申请</h3>
+        <div id="fdList"></div>
+      </div>
+    </div>
+
+    <!-- 账本 -->
+    <div class="tab-panel" id="panel-ledger" style="display:none;">
+      <div class="card">
+        <h3>链上行为账本 <span style="font-size:11px;color:#7FA6D9;">每一条都由你签名、广播全网、写入区块</span></h3>
+        <div id="ledgerList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var studentId = localStorage.getItem('cc_studentId') || '';
+  var $ = function(id){ return document.getElementById(id); };
+
+  function toast(msg){
+    var t = $('toast');
+    t.textContent = msg;
+    t.style.opacity = 1;
+    setTimeout(function(){ t.style.opacity = 0; }, 2600);
+  }
+  function shortKey(k){ if(!k) return ''; var b = k.replace(/-----/g,'').replace(/\s+/g,''); return b.slice(0,14)+'…'; }
+  function fmtTime(ts){ var d=new Date(ts*1000); return (d.getMonth()+1)+'/'+d.getDate()+' '+d.getHours()+':'+String(d.getMinutes()).padStart(2,'0'); }
+  function repClass(level){ return level==='黄金'?'rep-gold':(level==='白银'?'rep-silver':'rep-bronze'); }
+  function repBadgeHtml(level, rep){
+    return '<span class="rep-badge '+repClass(level)+'">'+level+' · 诚信 '+rep+'</span>';
+  }
+  function typeBadge(t){
+    var map = {
+      'BOOK':['book','📚 二手书'], 'ITEM':['item','📦 闲置'], 'BUY':['buy','🛒 成交'],
+      'VOLUNTEER':['vol','🤝 志愿'], 'VOL_JOIN':['task','✅ 接单'], 'VOL_TASK':['task','📋 发任务'],
+      'CLUB':['club','🏛 社团'], 'COMPETITION':['comp','🏆 竞赛'],
+      'FUND_APPLY':['fund','📝 申请'], 'FUND_GRANT':['fund','💵 发放']
+    };
+    var m = map[t] || ['item', t];
+    return '<span class="badge '+m[0]+'">'+m[1]+'</span>';
+  }
+  var CAT_LABEL = {book:'📚 书', bike:'🚲 自行车', elec:'🔌 数码', daily:'🧺 生活', other:'📦 其他'};
+
+  function register(){
+    var id = $('regId').value.trim(), name = $('regName').value.trim();
+    if(!id){ toast('请填写学号'); return; }
+    fetch('/api/student/register', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({studentId:id, name:name})})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d.error){ toast(d.error); return; }
+        studentId = d.studentId;
+        localStorage.setItem('cc_studentId', studentId);
+        enterApp(d);
+        toast('✔ 链上身份已生成：'+d.chainId);
+        refreshAll();
+      });
+  }
+  function logout(){ localStorage.removeItem('cc_studentId'); studentId=''; $('regCard').style.display='block'; $('appArea').style.display='none'; }
+  function enterApp(profile){
+    $('regCard').style.display='none'; $('appArea').style.display='block';
+    $('pName').textContent = profile.name;
+    $('pId').textContent = profile.studentId;
+    $('pKey').textContent = shortKey(profile.publicKey);
+  }
+  function switchTab(name){
+    var tabs = document.querySelectorAll('.tab');
+    for(var i=0;i<tabs.length;i++){ tabs[i].classList.remove('active'); }
+    document.querySelectorAll('.tab-panel').forEach(function(p){ p.style.display='none'; });
+    var order = ['market','vol','club','fund','ledger'];
+    var idx = order.indexOf(name);
+    if(idx>=0){ tabs[idx].classList.add('active'); $('panel-'+name).style.display='block'; }
+  }
+
+  // ---- 闲置市集 ----
+  function publishItem(){
+    var type = $('mkType').value, title = $('mkTitle').value.trim();
+    var price = parseInt($('mkPrice').value,10), desc = $('mkDesc').value.trim();
+    if(!title){ toast('请填写名称'); return; }
+    var api = type==='book' ? '/api/student/book' : '/api/student/item';
+    fetch(api, {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({studentId:studentId, title:title, price:price, desc:desc, category:type})})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d.error){ toast(d.error); return; }
+        toast('✔「'+title+'」已签名上链，进入市集');
+        $('mkTitle').value=''; $('mkDesc').value='';
+        refreshAll();
+      });
+  }
+  function buyItem(itemId){
+    if(!confirm('确认购买？成交记录将上链存证，买卖双方诚信度公开可见。')) return;
+    fetch('/api/student/buy', {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({studentId:studentId, itemId:itemId})})
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if(d.error){ toast(d.error); return; } toast('✔ 成交已上链'); refreshAll(); });
+  }
+  function loadMarket(){
+    fetch('/api/student/items').then(function(r){ return r.json(); }).then(function(items){
+      var onSale = items.filter(function(i){ return !i.sold; });
+      $('mkCount').textContent = onSale.length + ' 件在售';
+      if(!items.length){ $('mkList').innerHTML = '<div class="empty">市集还空着，来发布第一件闲置吧</div>'; return; }
+      var html = '';
+      for(var i=0;i<items.length;i++){
+        var it = items[i];
+        var btn = '';
+        if(!it.sold && it.seller !== studentId){
+          btn = '<button class="btn small" onclick="window.buyItem(\''+it.txId+'\')">购买</button>';
+        }
+        html += '<div class="list-item">' +
+          '<div class="main"><div class="title">'+typeBadge(it.type)+' '+ (CAT_LABEL[it.category]||'')+' 《'+it.title+'》</div>' +
+          '<div class="sub">卖家 #'+it.seller+' '+repBadgeHtml(it.sellerLevel, it.sellerReputation)+(it.desc?' · '+it.desc:'')+'</div></div>' +
+          '<span class="price">¥'+it.price+'</span>' +
+          (it.sold ? '<span class="badge sold">已售</span>' : '<span class="badge chain">在售</span>') + btn + '</div>';
+      }
+      $('mkList').innerHTML = html;
+    });
+  }
+
+  // ---- 志愿服务 ----
+  function checkinVol(){
+    var project = $('volProject').value.trim(), hours = parseFloat($('volHours').value);
+    if(!project){ toast('请填写服务项目'); return; }
+    fetch('/api/student/volunteer', {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({studentId:studentId, project:project, hours:hours})})
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if(d.error){ toast(d.error); return; } toast('✔「'+project+'」打卡 '+hours+'h 已上链'); $('volProject').value=''; refreshAll(); });
+  }
+  function publishTask(){
+    var title = $('vtTitle').value.trim(), hours = parseFloat($('vtHours').value), desc = $('vtDesc').value.trim();
+    if(!title){ toast('请填写任务名称'); return; }
+    fetch('/api/student/volTask', {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({studentId:studentId, title:title, hours:hours, desc:desc})})
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if(d.error){ toast(d.error); return; } toast('✔ 任务已上链，等待接单'); $('vtTitle').value=''; $('vtDesc').value=''; refreshAll(); });
+  }
+  function joinTask(taskId){
+    if(!confirm('确认接下这个志愿任务？接单记录将上链。')) return;
+    fetch('/api/student/volJoin', {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({studentId:studentId, taskId:taskId})})
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if(d.error){ toast(d.error); return; } toast('✔ 接单成功，服务时长已计入'); refreshAll(); });
+  }
+  function loadVolTasks(){
+    fetch('/api/student/volTasks').then(function(r){ return r.json(); }).then(function(tasks){
+      var open = tasks.filter(function(t){ return !t.joined; });
+      $('vtCount').textContent = open.length + ' 个任务招募中';
+      if(!tasks.length){ $('vtList').innerHTML = '<div class="empty">还没有志愿任务，发布一个或等同学发布</div>'; return; }
+      var html = '';
+      for(var i=0;i<tasks.length;i++){
+        var t = tasks[i];
+        var btn = '';
+        if(!t.joined && t.publisher !== studentId){
+          btn = '<button class="btn small" onclick="window.joinTask(\''+t.txId+'\')">接单</button>';
+        }
+        html += '<div class="list-item">' +
+          '<div class="main"><div class="title">'+typeBadge('VOL_TASK')+' '+t.title+'</div>' +
+          '<div class="sub">发布者 #'+t.publisher+' '+repBadgeHtml(t.publisherLevel, t.publisherReputation)+(t.desc?' · '+t.desc:'')+'</div></div>' +
+          '<span class="price">'+t.hours+'h</span>' +
+          (t.joined ? '<span class="badge sold">已接单</span>' : '<span class="badge chain">招募中</span>') + btn + '</div>';
+      }
+      $('vtList').innerHTML = html;
+    });
+  }
+
+  // ---- 社团竞赛 ----
+  function joinClub(){
+    var club = $('clClub').value.trim(), role = $('clRole').value.trim() || '成员';
+    if(!club){ toast('请填写社团名称'); return; }
+    fetch('/api/student/club', {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({studentId:studentId, club:club, role:role})})
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if(d.error){ toast(d.error); return; } toast('✔ 已加入「'+club+'」并上链'); $('clClub').value=''; refreshAll(); });
+  }
+  function addCompetition(){
+    var comp = $('cpComp').value.trim(), award = $('cpAward').value.trim();
+    if(!comp){ toast('请填写竞赛名称'); return; }
+    fetch('/api/student/competition', {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({studentId:studentId, competition:comp, award:award})})
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if(d.error){ toast(d.error); return; } toast('✔ 竞赛获奖已上链'); $('cpComp').value=''; $('cpAward').value=''; refreshAll(); });
+  }
+
+  // ---- 经费资助 ----
+  function applyFund(){
+    var amount = parseInt($('fdAmount').value,10), reason = $('fdReason').value.trim();
+    if(!reason){ toast('请填写申请理由'); return; }
+    fetch('/api/student/fundApply', {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({studentId:studentId, reason:reason, amount:amount})})
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if(d.error){ toast(d.error); return; } toast('✔ 申请已提交，等待平台审批'); $('fdReason').value=''; refreshAll(); });
+  }
+  function loadFunds(){
+    fetch('/api/student/funds?studentId='+encodeURIComponent(studentId)).then(function(r){ return r.json(); }).then(function(funds){
+      if(!funds.length){ $('fdList').innerHTML = '<div class="empty">还没有资助申请</div>'; return; }
+      var html = '';
+      for(var i=0;i<funds.length;i++){
+        var f = funds[i];
+        var st = f.status==='approved' ? '<span class="badge chain">已通过</span>'
+              : (f.status==='rejected' ? '<span class="badge rejected">已驳回</span>' : '<span class="badge pending">审批中</span>');
+        html += '<div class="list-item"><div class="main"><div class="title">'+typeBadge(f.status==='approved'?'FUND_GRANT':'FUND_APPLY')+' '+f.reason+'</div>' +
+          '<div class="sub">'+fmtTime(f.time)+' · 申请 #'+f.applyId.slice(0,8)+'</div></div>' +
+          '<span class="price">¥'+f.amount+'</span>' + st + '</div>';
+      }
+      $('fdList').innerHTML = html;
+    });
+  }
+
+  // ---- 账本 ----
+  function loadLedger(){
+    fetch('/api/student/ledger?studentId='+encodeURIComponent(studentId)).then(function(r){ return r.json(); }).then(function(d){
+      if(d.error){ return; }
+      $('stReputation').textContent = d.reputation;
+      $('stHours').textContent = d.totalHours;
+      $('stRecords').textContent = d.totalRecords;
+      var badge = $('repBadge');
+      badge.className = 'rep-badge ' + repClass(d.level);
+      badge.textContent = '诚信 ' + d.reputation + ' · ' + d.level;
+      if(!d.records.length){ $('ledgerList').innerHTML = '<div class="empty">账本还是空的 — 发布闲置、志愿打卡、参加社团竞赛或申请资助后，记录都会出现在这里</div>'; return; }
+      var html = '';
+      for(var i=0;i<d.records.length;i++){
+        var r = d.records[i];
+        var content = r.title || r.project || r.club || r.competition || '';
+        var extra = '';
+        if(r.type==='COMPETITION' && r.award) extra = ' · '+r.award;
+        if(r.type==='CLUB' && r.role) extra = ' · '+r.role;
+        if(r.type==='BUY' && r.role) extra = ' · '+r.role;
+        if(r.type==='FUND_APPLY') extra = ' · '+(r.status==='approved'?'已通过':(r.status==='rejected'?'已驳回':'审批中'));
+        html += '<div class="list-item">' +
+          '<div class="main"><div class="title">'+typeBadge(r.type)+' '+content+extra+'</div>' +
+          '<div class="sub">'+fmtTime(r.time)+' · #'+r.txId.slice(0,8)+'</div></div>' +
+          '<span class="price">'+(r.type==='VOLUNTEER'||r.type==='VOL_JOIN' ? r.hours+'h' : '¥'+r.amount)+'</span>' +
+          (r.onchain ? '<span class="badge chain">已上链</span>' : '<span class="badge pending">待上链</span>') + '</div>';
+      }
+      $('ledgerList').innerHTML = html;
+    });
+  }
+
+  function refreshAll(){ if(!studentId) return; loadMarket(); loadVolTasks(); loadFunds(); loadLedger(); }
+
+  window.register = register; window.logout = logout; window.switchTab = switchTab;
+  window.publishItem = publishItem; window.buyItem = buyItem;
+  window.checkinVol = checkinVol; window.publishTask = publishTask; window.joinTask = joinTask;
+  window.joinClub = joinClub; window.addCompetition = addCompetition;
+  window.applyFund = applyFund;
+
+  if(studentId){
+    fetch('/api/student/register', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({studentId:studentId})})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(d.error){ localStorage.removeItem('cc_studentId'); studentId=''; return; }
+        enterApp(d); refreshAll();
+      });
+  }
+  setInterval(function(){ if(studentId) refreshAll(); }, 4000);
+})();
+</script>
+</body>
+</html>
